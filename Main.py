@@ -94,7 +94,7 @@ def main(settings):
 
     if settings.create_spoiler:
         worlds[settings.player_num - 1].spoiler.to_file(os.path.join(output_dir, '%s_Spoiler.txt' % outfilebase))
-
+    os.remove('hints.txt')
     logger.info('Done. Enjoy.')
     logger.debug('Total Time: %s', time.clock() - start)
 

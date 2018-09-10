@@ -759,3 +759,10 @@ class Spoiler(object):
                 outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id) for location in self.required_locations]))
             else:
                 outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in self.required_locations]))
+
+            f = open('hints.txt','r')
+            outfile.write('\n\n')
+            outfile.write(f.read())
+            f.close()
+            
+            

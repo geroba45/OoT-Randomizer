@@ -77,6 +77,8 @@ gooditems = [
     'Requiem of Spirit',
 ]
 
+spoilerHintsList = []
+
 
 # build a formatted string with linebreaks appropriate textboxes
 def buildHintString(hintString):
@@ -138,34 +140,53 @@ def buildGossipHints(world, messages):
     #shuffles the stone addresses for randomization, always locations will be placed first and twice
     random.shuffle(stoneIDs)
 
+    spoilerHintsList.append('-Way of the Hero-')
     # add required items locations for hints (good hints)
-    requiredSample = world.spoiler.required_locations
-    if len(requiredSample) >= 4:
-        requiredSample = random.sample(requiredSample, random.randint(3,4))
-    for location in requiredSample:
-        if location.parent_region.dungeon:
-            update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(location.parent_region.dungeon.name).text + \
-                " is on the way of the hero."))
+    requiredSample = []
+    requiredSample1 = world.spoiler.required_locations
+    #print([(location.parent_region.name, location.item.name) for location in requiredSample])
+    # loop through the locations we got for "always required locatiosns"
+    # if you find lens, remove it
+    for l in requiredSample1:
+        if l.item.name == 'Lens of Truth':
+            continue
         else:
-            update_hint(messages, stoneIDs.pop(0), buildHintString(location.parent_region.name + " is on the way of the hero."))
-
+            requiredSample.append(l)
+    #print([(location.parent_region.name, location.item.name) for location in requiredSample])
+    if len(requiredSample) >= 4:
+        requiredSample = random.sample(requiredSample, 4) #Pick exactly 4
+    for location in requiredSample:
+        for _ in range(0,3): #and distribute each 3 times (12 / 32)
+            if location.parent_region.dungeon:
+                update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(location.parent_region.dungeon.name).text + \
+                    " is on the way of the hero."))
+                spoilerHintsList.append(location.parent_region.dungeon.name + ': ' + location.item.name)
+                #print(location.parent_region.dungeon.name, ': ', location.item.name)
+            else:
+                update_hint(messages, stoneIDs.pop(0), buildHintString(location.parent_region.name + " is on the way of the hero."))
+                spoilerHintsList.append(location.parent_region.hintName + ": " + location.item.name)
+                #print(location.parent_region.name, ': ', location.item.name)
     # Don't repeat hints
     checkedLocations = []
 
+    spoilerHintsList.append('\n-Required Locations-')
     # Add required location hints
     alwaysLocations = getHintGroup('alwaysLocation', world)
     for hint in alwaysLocations:
         for locationWorld in world.get_locations():
             if hint.name == locationWorld.name:
-                checkedLocations.append(hint.name)   
-                update_hint(messages, stoneIDs.pop(0), getHint(locationWorld.name).text + " " + \
-                    getHint(getItemGenericName(locationWorld.item)).text + ".")
+                checkedLocations.append(hint.name)
+                for _ in range(0,2): #populate each of these twice (24 / 32)
+                    update_hint(messages, stoneIDs.pop(0), getHint(locationWorld.name).text + " " + \
+                        getHint(getItemGenericName(locationWorld.item)).text + ".")
+                    spoilerHintsList.append(locationWorld.name + ": " + locationWorld.item.name)
 
-
+    spoilerHintsList.append('\n-Good Locations-')
     # Add good location hints
     sometimesLocations = getHintGroup('location', world)
     if sometimesLocations:
-        for _ in range(0, random.randint(9,10) - len(alwaysLocations)):
+        # for _ in range(0, random.randint(9,10) - len(alwaysLocations)):
+        for _ in range(0, 2): # Exactly 2 of these (26 / 
             hint = random.choice(sometimesLocations)
             # Repick if location isn't new
             while hint.name in checkedLocations or hint.name in alwaysLocations:
@@ -176,9 +197,11 @@ def buildGossipHints(world, messages):
                     checkedLocations.append(locationWorld.name)    
                     update_hint(messages, stoneIDs.pop(0), getHint(locationWorld.name).text + " " + \
                         getHint(getItemGenericName(locationWorld.item)).text + ".")
+                    spoilerHintsList.append(locationWorld.name + ': ' + locationWorld.item.name)
 
+    spoilerHintsList.append('\n-BadItem Dungeon-')
     # add bad dungeon locations hints
-    for dungeon in random.sample(world.dungeons, random.randint(3,4)):
+    for dungeon in random.sample(world.dungeons, 2): # Exactly 2 of these (28 / 32)
         # Choose a randome dungeon location that is a non-dungeon item
         locationWorld = random.choice([location for region in dungeon.regions for location in world.get_region(region).locations
             if location.item.type != 'Event' and \
@@ -190,7 +213,9 @@ def buildGossipHints(world, messages):
         checkedLocations.append(locationWorld.name)
         update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(dungeon.name).text + \
             " hoards " + getHint(getItemGenericName(locationWorld.item)).text + "."))
+        spoilerHintsList.append(dungeon.name + ': ' + locationWorld.item.name) 
 
+    spoilerHintsList.append('\n-BadItem Overworld-')
     # add bad overworld locations hints
     # only choose location if it is new and a proper item from the overworld
     overworldlocations = [locationWorld for locationWorld in world.get_locations()
@@ -203,13 +228,15 @@ def buildGossipHints(world, messages):
             not locationWorld.parent_region.dungeon and \
             not locationWorld.name in checkedLocations]
     overworldSample = overworldlocations
-    if len(overworldSample) >= 4:
-        overworldSample = random.sample(overworldlocations, random.randint(3,4))
+    if len(overworldSample) >= 2: # Only need to check for 2
+        overworldSample = random.sample(overworldlocations, 2) # Exactly 2 of these (30 / 32)
     for locationWorld in overworldSample:
         checkedLocations.append(locationWorld.name)
         update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(getItemGenericName(locationWorld.item)).text + \
-            " can be found at " + locationWorld.parent_region.name + ".")) 
+            " can be found at " + locationWorld.parent_region.name + "."))
+        spoilerHintsList.append(locationWorld.parent_region.name + ': ' + locationWorld.item.name)
 
+    spoilerHintsList.append('\n-Good Items-')
     # add good item hints
     # only choose location if it is new and a good item
     if world.shuffle_weird_egg:
@@ -218,22 +245,37 @@ def buildGossipHints(world, messages):
             if not locationWorld.name in checkedLocations and \
             locationWorld.item.name in gooditems]
     gooditemSample = gooditemlocations
-    if len(gooditemSample) >= 5:
-        gooditemSample = random.sample(gooditemlocations, random.randint(3,5))
-    for locationWorld in gooditemSample:
+    # Don't need this check, we'll fill the rest from this pool, usually only 2, can be more in very rare cases
+    # if len(gooditemSample) >= 5:
+    #    gooditemSample = random.sample(gooditemlocations, random.randint(3,5))
+    # for locationWorld in gooditemSample:
+    random.shuffle(gooditemSample)
+    while stoneIDs:
+        locationWorld = gooditemSample.pop()
         checkedLocations.append(locationWorld.name)
         if locationWorld.parent_region.dungeon:
             update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(locationWorld.parent_region.dungeon.name).text + \
                 " hoards " + getHint(getItemGenericName(locationWorld.item)).text + "."))
+            spoilerHintsList.append(locationWorld.parent_region.dungeon.name + ': ' + locationWorld.item.name)
         else:
             update_hint(messages, stoneIDs.pop(0), buildHintString(getHint(getItemGenericName(locationWorld.item)).text + \
                 " can be found at " + locationWorld.parent_region.name + "."))
+            spoilerHintsList.append(locationWorld.parent_region.name + ': ' + locationWorld.item.name)
 
+    #spoilerHintsList.append('\n-Junk-\n')
+    
+    f = open("hints.txt","w")
+    f.write('~~~ NEW HINTS ~~~\n\n')
+    f.write('\n'.join(spoilerHintsList))
+    f.close()
+    
+    #print(*spoilerHintsList, sep='\n')
+    # We don't need this anymore
     # fill the remaining hints with junk    
-    junkHints = getHintGroup('junkHint', world)
-    random.shuffle(junkHints)
-    while stoneIDs:
-        update_hint( messages, stoneIDs.pop(0), junkHints.pop().text )
+##    junkHints = getHintGroup('junkHint', world)
+##    random.shuffle(junkHints)
+##    while stoneIDs:
+##        update_hint( messages, stoneIDs.pop(0), junkHints.pop().text )
 
 # builds boss reward text that is displayed at the temple of time altar for child and adult, pull based off of item in a fixed order.
 def buildBossRewardHints(world, messages):
