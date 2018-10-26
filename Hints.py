@@ -122,8 +122,8 @@ def buildGossipHints(world):
         'requiredLocation': 1
     }
     hintCounts = {
-        'trial': sum(hintMultiplication['trial'] for i in world.skipped_trials if
-                     (6 > world.trials > 3 and i.value) or (3 >= world.trials > 0 and not i.value)),
+        'trial': sum(hintMultiplication['trial'] for trial,skipped in world.skipped_trials.items() if
+                     (6 > world.trials > 3 and skipped) or (3 >= world.trials > 0 and not skipped)),
         'woth': hintMultiplication['woth'] * len(requiredSample) if not len(requiredSample) >= 5 else random.randint(3,4),
         'requiredLocation': hintMultiplication['requiredLocation'] * len(alwaysLocations),
         'goodlocation': 0,
@@ -206,7 +206,7 @@ def buildGossipHints(world):
         j = 0
         for hint in alwaysLocations:
             j += 1
-            if (len(requiredSample) * i) + j > hintCounts['requiredLocation']:
+            if (len(alwaysLocations) * i) + j > hintCounts['requiredLocation']:
                 break
             for locationWorld in world.get_locations():
                 if hint.name == locationWorld.name:
