@@ -124,8 +124,8 @@ def buildGossipHints(world):
     hintCounts = {
         'trial': sum(hintMultiplication['trial'] for trial,skipped in world.skipped_trials.items() if
                      (6 > world.trials > 3 and skipped) or (3 >= world.trials > 0 and not skipped)),
-        'woth': hintMultiplication['woth'] * len(requiredSample) if not len(requiredSample) >= 5 else random.randint(3,4),
-        'requiredLocation': hintMultiplication['requiredLocation'] * len(alwaysLocations),
+        'woth': 0,
+        'requiredLocation': len(alwaysLocations) * hintMultiplication['requiredLocation'],
         'goodlocation': 0,
         'badDungeon': 0,
         'badOverworld': 0,
@@ -138,7 +138,7 @@ def buildGossipHints(world):
         hintMultiplication['woth'] = 3
         hintCounts['woth'] = 4 * hintMultiplication['woth']
         hintMultiplication['requiredLocation'] = 2
-        hintCounts['requiredLocation'] = hintMultiplication['requiredLocation'] * len(alwaysLocations)
+        hintCounts['requiredLocation'] = hintCounts['requiredLocation'] * hintMultiplication['requiredLocation']
         # Good Item and Bad Overworld/Dungeon hints fill out the remainder, split as evenly as possible.
         hintCounts['goodItem'] = int((len(stoneIDs) - sum(hintCounts.values())) / 2)
         if (sum(hintCounts.values()) % 2) != 0:
@@ -152,11 +152,11 @@ def buildGossipHints(world):
     elif world.hint_distribution == 'jokes':
         # Jokes!
         hintCounts['trial'] = 0
-        hintCounts['woth'] = 0
         hintCounts['requiredLocation'] = 0
         hintCounts['joke'] = len(stoneIDs)
     else:
         # Normal Hints
+        hintCounts['woth'] = hintMultiplication['woth'] * len(requiredSample) if not len(requiredSample) >= 5 else random.randint(3,4)
         hintCounts['goodlocation'] = random.randint(11,12) - len(alwaysLocations)
         hintCounts['badDungeon'] = random.randint(3,4)
         # Use bad overworld hints to balance hints given via trials
