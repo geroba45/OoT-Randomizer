@@ -1730,6 +1730,47 @@ setting_infos = [
                       required to beat the game.
                       '''
         }),
+    Setting_Info('hint_distribution', str, 2, True,
+        {
+            'default': 'normal',
+            'const': 'normal',
+            'nargs': '?',
+            'help': '''\
+                    Choose the distribution of hint types.
+                    normal:     Default distribution of hints.
+                    tournament: Tournament style with duplicate Way of the Hero and Required Location hints.
+                    jokes:      All hints are jokes.
+                    '''
+        },
+        {
+            'text': 'Hint Distribution',
+            'group': 'other',
+            'widget': 'Combobox',
+            'default': 'Normal',
+            'options': {
+                'Normal': 'normal',
+                'Tournament': 'tournament',
+                'Jokes': 'jokes',
+            },
+            'tooltip':'''\
+                      This setting controls the types of hints that
+                      you will find in the game.
+                      
+                      Normal: The default setting with up to 4 Way of
+                      the Hero hints, a hint for each location that is
+                      required to have a hint, plus a good assortment of
+                      good location/item and bad dungeon/overworld hints
+                      with joke hints filling out the remainder.
+                      
+                      Tournament: This option has the more powerful hints
+                      duplicated, with good/bad item hints filling in the
+                      remainder. No joke hints. Lens of Truth can not trigger
+                      a Way of the Hero hint unless the Lens logic is set
+                      to Only Chest Minigame.
+                      
+                      Jokes: All hints are joke hints.
+                      '''
+        }),
     Setting_Info('text_shuffle', str, 2, True, 
         {
             'default': 'none',
