@@ -133,19 +133,19 @@ def buildGossipHints(world):
         'joke': 0  # Joke hints will fill the rest of the gossips regardless.
     }
 
-    if world.hint_distribution == 'tournament':
-        # Tournament Hints
+    if world.hint_distribution == 'powerful':
+        # Powerful Hints
         hintMultiplication['woth'] = 3
         hintCounts['woth'] = 4 * hintMultiplication['woth']
         hintMultiplication['requiredLocation'] = 2
         hintCounts['requiredLocation'] = hintMultiplication['requiredLocation'] * len(alwaysLocations)
         # Good Item and Bad Overworld/Dungeon hints fill out the remainder, split as evenly as possible.
         hintCounts['goodItem'] = int((len(stoneIDs) - sum(hintCounts.values())) / 2)
-        if not (sum(hintCounts.values()) % 2) == 0:
+        if (sum(hintCounts.values()) % 2) != 0:
             hintCounts['goodItem'] += random.randint(0,1)
         hintCounts['badOverworld'] = random.randint(0, (len(stoneIDs) - sum(hintCounts.values())))
         hintCounts['badDungeon'] = (len(stoneIDs) - sum(hintCounts.values()))
-        # Remove Lens of Truth from Way of the Hero.
+        # Remove Lens of Truth and other bad hint items from Way of the Hero.
         requiredSample = [x for x in requiredSample if x.item.name not in [['Master Sword', 'Stone of Agony']]]
         if world.logic_lens != 'chest':
             requiredSample = [x for x in requiredSample if x.item.name != 'Lens of Truth']
@@ -172,15 +172,17 @@ def buildGossipHints(world):
         hintCounts['joke'] = len(stoneIDs) - sum(hintCounts.values())
 
     # Add trial hints
+    trialHintsAdded = 0
     for i in range(hintMultiplication['trial']):
-        if world.trials < 6 and world.trials > 3:
-            for trial,skipped in world.skipped_trials.items():
-                if skipped:
-                    add_hint(world, stoneIDs.pop(0), buildHintString("the " + colorText(trial + " Trial", 'Yellow') + " was dispelled by Sheik."))
-        elif world.trials <= 3 and world.trials > 0:
-            for trial,skipped in world.skipped_trials.items():
-                if not skipped:
-                    add_hint(world, stoneIDs.pop(0), buildHintString("the " + colorText(trial + " Trial", 'Pink') + " protects Ganon's Tower."))
+        for trial, skipped in world.skipped_trials.items():
+            if trialHintsAdded >= hintCounts['trial']:
+                break
+            if world.trials < 6 and world.trials > 3 and skipped:
+                trialHintsAdded += 1
+                add_hint(world, stoneIDs.pop(0), buildHintString("the " + colorText(trial + " Trial", 'Yellow') + " was dispelled by Sheik."))
+            elif world.trials <= 3 and world.trials > 0 and not skipped:
+                trialHintsAdded += 1
+                add_hint(world, stoneIDs.pop(0), buildHintString("the " + colorText(trial + " Trial", 'Pink') + " protects Ganon's Tower."))
 
     # add required items locations for hints (good hints)
     requiredSample = random.sample(requiredSample, int(hintCounts['woth'] / hintMultiplication['woth']))
@@ -229,7 +231,7 @@ def buildGossipHints(world):
 
     # add bad dungeon locations hints
     for dungeon in random.sample(world.dungeons, hintCounts['badDungeon']):
-        # Choose a randome dungeon location that is a non-dungeon item
+        # Choose a random dungeon location that is a non-dungeon item
         dungeon_locations = [location for region in dungeon.regions for location in region.locations
             if location.item.type != 'Event' and \
             location.item.type != 'Shop' and \

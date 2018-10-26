@@ -1737,9 +1737,9 @@ setting_infos = [
             'nargs': '?',
             'help': '''\
                     Choose the distribution of hint types.
-                    normal:     Default distribution of hints.
-                    tournament: Tournament style with duplicate Way of the Hero and Required Location hints.
-                    jokes:      All hints are jokes.
+                    normal:    Default distribution of hints.
+                    powerful:  More powerful hints with duplicate Way of the Hero and Required Location hints.
+                    jokes:     All hints are jokes.
                     '''
         },
         {
@@ -1749,20 +1749,20 @@ setting_infos = [
             'default': 'Normal',
             'options': {
                 'Normal': 'normal',
-                'Tournament': 'tournament',
+                'Powerful': 'powerful',
                 'Jokes': 'jokes',
             },
             'tooltip':'''\
                       This setting controls the types of hints that
                       you will find in the game.
                       
-                      Normal: The default setting with up to 4 Way of
+                      Normal: The default setting with a few Way of
                       the Hero hints, a hint for each location that is
                       required to have a hint, plus a good assortment of
                       good location/item and bad dungeon/overworld hints
                       with joke hints filling out the remainder.
                       
-                      Tournament: This option has the more powerful hints
+                      Powerful: This option has the more powerful hints
                       duplicated, with good/bad item hints filling in the
                       remainder. No joke hints. Lens of Truth can not trigger
                       a Way of the Hero hint unless the Lens logic is set
