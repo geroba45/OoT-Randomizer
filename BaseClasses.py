@@ -616,6 +616,7 @@ class CollectionState(object):
             item_locations = list(filter(lambda location: location.world.id in spoiler_locations[location.name], item_locations))
 
         required_locations = []
+        pseudo_required_locations = []
         reachable_items_locations = True
         while (item_locations and reachable_items_locations):
             reachable_items_locations = [location for location in all_locations if location.name not in state_list[location.world.id].collected_locations and state_list[location.world.id].can_reach(location)]
@@ -626,6 +627,20 @@ class CollectionState(object):
                     location.item = None
                     if not CollectionState.can_beat_game(state_list):
                         required_locations.append(location)
+
+                        # Let's check to see if some of those required items are actually easily skipped.
+                        # Lens/Stone of Agony/Tunics are the big ones here.
+                        lens_logic_setting = worlds[location.world.id].logic_lens
+                        hints_setting = worlds[location.world.id].hints
+                        logic_fewer_tunic_requirements_setting = worlds[location.world.id].logic_fewer_tunic_requirements
+                        worlds[location.world.id].logic_lens = 'chest'
+                        worlds[location.world.id].hints = 'always'
+                        worlds[location.world.id].logic_fewer_tunic_requirements = True
+                        if CollectionState.can_beat_game(state_list):
+                            pseudo_required_locations.append(location)
+                        worlds[location.world.id].logic_lens = lens_logic_setting
+                        worlds[location.world.id].hints = hints_setting
+                        worlds[location.world.id].logic_fewer_tunic_requirements = logic_fewer_tunic_requirements_setting
                     location.item = old_item
                     item_locations.remove(location)
                 state_list[location.world.id].collected_locations[location.name] = True
@@ -633,11 +648,13 @@ class CollectionState(object):
 
         # Filter the required location to only include location in the world
         required_locations_dict = {}
+        pseudo_required_locations_dict = {}
         for world in worlds:
             required_locations_dict[world.id] = list(filter(lambda location: location.world.id == world.id, required_locations))
+            pseudo_required_locations_dict[world.id] = list(filter(lambda location: location.world.id == world.id, pseudo_required_locations))
         for world in worlds:
             world.spoiler.required_locations = required_locations_dict
-
+            world.spoiler.pseudo_required_locations = pseudo_required_locations_dict
 
 @unique
 class RegionType(Enum):
@@ -879,6 +896,7 @@ class Spoiler(object):
         self.locations = {}
         self.metadata = {}
         self.required_locations = []
+        self.pseudo_required_locations = []
         self.hints = {}
 
     def parse_data(self):
@@ -915,12 +933,22 @@ class Spoiler(object):
 
             if len(self.hints) > 0:
                 for world in self.worlds:
+                    required_locations = self.required_locations[world.id]
+                    pseudo_required_locations = self.pseudo_required_locations[world.id]
+                    if world.hint_distribution == 'powerful':
+                        required_locations = [x for x in required_locations if x not in pseudo_required_locations]
                     if self.settings.world_count > 1:
                         outfile.write('\n\nWay of the Hero [Player %d]:\n\n' % (world.id + 1))
-                        outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id + 1) for location in self.required_locations[world.id]]))
+                        outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id + 1) for location in required_locations]))
+                        if pseudo_required_locations and world.hint_distribution == 'powerful':
+                            outfile.write('\n\nOther Logically Required [Player %d]:\n\n' % (world.id + 1))
+                            outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id + 1) for location in pseudo_required_locations]))
                     else:
                         outfile.write('\n\nWay of the Hero:\n\n')
-                        outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in self.required_locations[world.id]]))
+                        outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in required_locations]))
+                        if pseudo_required_locations and world.hint_distribution == 'powerful':
+                            outfile.write('\n\nOther Logically Required:\n\n')
+                            outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in pseudo_required_locations]))
 
                 gossipLocations = {
                     0x0401: 'Zoras Fountain (Fairy)',

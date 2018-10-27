@@ -1764,10 +1764,12 @@ setting_infos = [
                       
                       Powerful: This option has the more powerful hints
                       duplicated, with good/bad item hints filling in the
-                      remainder. No joke hints. Lens of Truth can not trigger
-                      a Way of the Hero hint unless the Lens logic is set
-                      to Only Chest Minigame.
-                      
+                      remainder. No joke hints. Way of the Hero hints assume
+                      Lens of Truth logic is set to Only Chest Minigame,
+                      Fewer Tunic Requirements is enabled, and that hints
+                      don't require Stone of Agony so that those items don't
+                      lead to a misleading hint.
+                                            
                       Jokes: All hints are joke hints.
                       '''
         }),

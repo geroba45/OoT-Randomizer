@@ -146,9 +146,7 @@ def buildGossipHints(world):
         hintCounts['badOverworld'] = random.randint(0, (len(stoneIDs) - sum(hintCounts.values())))
         hintCounts['badDungeon'] = (len(stoneIDs) - sum(hintCounts.values()))
         # Remove Lens of Truth and other bad hint items from Way of the Hero.
-        requiredSample = [x for x in requiredSample if x.item.name not in [['Master Sword', 'Stone of Agony']]]
-        if world.logic_lens != 'chest':
-            requiredSample = [x for x in requiredSample if x.item.name != 'Lens of Truth']
+        requiredSample = [x for x in requiredSample if x not in world.spoiler.pseudo_required_locations[world.id]]
     elif world.hint_distribution == 'jokes':
         # Jokes!
         hintCounts['trial'] = 0
