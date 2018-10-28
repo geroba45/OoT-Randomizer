@@ -111,7 +111,7 @@ def buildGossipHints(world):
     random.shuffle(stoneIDs)
 
     # Initialize these now.
-    requiredSample = world.spoiler.required_locations[world.id]
+    requiredSample = [x for x in world.spoiler.required_locations[world.id] if x not in world.spoiler.pseudo_required_locations[world.id]]
     alwaysLocations = getHintGroup('alwaysLocation', world)
     sometimesLocations = getHintGroup('location', world)
 
@@ -145,8 +145,6 @@ def buildGossipHints(world):
             hintCounts['goodItem'] += random.randint(0,1)
         hintCounts['badOverworld'] = random.randint(0, (len(stoneIDs) - sum(hintCounts.values())))
         hintCounts['badDungeon'] = (len(stoneIDs) - sum(hintCounts.values()))
-        # Remove Lens of Truth and other bad hint items from Way of the Hero.
-        requiredSample = [x for x in requiredSample if x not in world.spoiler.pseudo_required_locations[world.id]]
     elif world.hint_distribution == 'jokes':
         # Jokes!
         hintCounts['trial'] = 0

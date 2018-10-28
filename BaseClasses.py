@@ -628,19 +628,20 @@ class CollectionState(object):
                     if not CollectionState.can_beat_game(state_list):
                         required_locations.append(location)
 
-                        # Let's check to see if some of those required items are actually easily skipped.
-                        # Lens/Stone of Agony/Tunics are the big ones here.
-                        lens_logic_setting = worlds[location.world.id].logic_lens
-                        hints_setting = worlds[location.world.id].hints
-                        logic_fewer_tunic_requirements_setting = worlds[location.world.id].logic_fewer_tunic_requirements
-                        worlds[location.world.id].logic_lens = 'chest'
-                        worlds[location.world.id].hints = 'always'
-                        worlds[location.world.id].logic_fewer_tunic_requirements = True
-                        if CollectionState.can_beat_game(state_list):
-                            pseudo_required_locations.append(location)
-                        worlds[location.world.id].logic_lens = lens_logic_setting
-                        worlds[location.world.id].hints = hints_setting
-                        worlds[location.world.id].logic_fewer_tunic_requirements = logic_fewer_tunic_requirements_setting
+                        if worlds[location.world.id].hint_distribution == 'powerful':
+                            # Let's check to see if some of those required items are actually easily skipped.
+                            # Lens/Stone of Agony/Tunics are the big ones here.
+                            lens_logic_setting = worlds[location.world.id].logic_lens
+                            hints_setting = worlds[location.world.id].hints
+                            logic_fewer_tunic_requirements_setting = worlds[location.world.id].logic_fewer_tunic_requirements
+                            worlds[location.world.id].logic_lens = 'chest'
+                            worlds[location.world.id].hints = 'always'
+                            worlds[location.world.id].logic_fewer_tunic_requirements = True
+                            if CollectionState.can_beat_game(state_list):
+                                pseudo_required_locations.append(location)
+                            worlds[location.world.id].logic_lens = lens_logic_setting
+                            worlds[location.world.id].hints = hints_setting
+                            worlds[location.world.id].logic_fewer_tunic_requirements = logic_fewer_tunic_requirements_setting
                     location.item = old_item
                     item_locations.remove(location)
                 state_list[location.world.id].collected_locations[location.name] = True
@@ -933,20 +934,18 @@ class Spoiler(object):
 
             if len(self.hints) > 0:
                 for world in self.worlds:
-                    required_locations = self.required_locations[world.id]
                     pseudo_required_locations = self.pseudo_required_locations[world.id]
-                    if world.hint_distribution == 'powerful':
-                        required_locations = [x for x in required_locations if x not in pseudo_required_locations]
+                    required_locations = [x for x in self.required_locations[world.id] if x not in pseudo_required_locations]
                     if self.settings.world_count > 1:
                         outfile.write('\n\nWay of the Hero [Player %d]:\n\n' % (world.id + 1))
                         outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id + 1) for location in required_locations]))
-                        if pseudo_required_locations and world.hint_distribution == 'powerful':
+                        if pseudo_required_locations:
                             outfile.write('\n\nOther Logically Required [Player %d]:\n\n' % (world.id + 1))
                             outfile.write('\n'.join(['%s: %s [Player %d]' % (location.name, location.item.name, location.item.world.id + 1) for location in pseudo_required_locations]))
                     else:
                         outfile.write('\n\nWay of the Hero:\n\n')
                         outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in required_locations]))
-                        if pseudo_required_locations and world.hint_distribution == 'powerful':
+                        if pseudo_required_locations:
                             outfile.write('\n\nOther Logically Required:\n\n')
                             outfile.write('\n'.join(['%s: %s' % (location.name, location.item.name) for location in pseudo_required_locations]))
 
