@@ -2131,6 +2131,15 @@ setting_infos = [
         shared         = True,
     ),
     Checkbutton(
+        name           = 'obscure_freestanding_models',
+        gui_text       = 'Obscure Freestanding Models',
+        gui_tooltip    = '''\
+            Freestanding item models will display the model
+            of the item that is there in the vanilla game.
+        ''',
+        shared         = True,
+    ),
+    Checkbutton(
         name           = 'clearer_hints',
         gui_text       = 'Clearer Hints',
         gui_tooltip    = '''\
