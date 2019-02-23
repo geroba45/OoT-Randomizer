@@ -461,7 +461,6 @@ tradeitemoptions = (
 
 fixedlocations = {
     'Ganon': 'Triforce',
-    'Zeldas Letter': 'Zeldas Letter',
     'Pierre': 'Scarecrow Song',
     'Deliver Ruto\'s Letter': 'Deliver Letter',
     'Master Sword Pedestal': 'Time Travel',
@@ -744,7 +743,9 @@ def generate_itempool(world):
 
 def get_pool_core(world):
     pool = []
-    placed_items = {}
+    placed_items = {
+        'Zeldas Letter': 'Zeldas Letter',
+    }
 
     if world.shuffle_kokiri_sword:
         pool.append('Kokiri Sword')
