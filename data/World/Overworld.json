@@ -731,9 +731,10 @@
         "events": {
             "Skull Mask": "Zeldas_Letter and (open_kakariko or at('Kakariko Village', is_child))",
             "Mask of Truth": "'Skull Mask' and
-                at('Lost Woods', is_child and can_play(Sarias_Song)) and
-                at('Graveyard', is_child and at_day) and
-                at('Hyrule Field', is_child and has_all_stones)"
+                (is_child and complete_mask_quest) or
+                (at('Lost Woods', is_child and can_play(Sarias_Song)) and
+                 at('Graveyard', is_child and at_day) and
+                 at('Hyrule Field', is_child and has_all_stones))"
         },
         "exits": {
             "Castle Town": "True"
