@@ -1002,7 +1002,8 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
         save_context.write_bits(0x00D4 + 0x48 * 0x1C + 0x08 + 0x3, 0x10) # Beat First Dampe Race (& Chest Spawned)
 
     # Make the Kakariko Gate not open with the MS
-    rom.write_int32(0xDD3538, 0x34190000) # li t9, 0
+    if not world.open_kakariko:
+        rom.write_int32(0xDD3538, 0x34190000) # li t9, 0
 
     if world.zora_fountain == 'open':
         save_context.write_bits(0x0EDB, 0x08) # "Moved King Zora"
