@@ -766,6 +766,8 @@ def patch_rom(spoiler:Spoiler, world:World, rom:Rom):
                 copy_entrance_record(blue_out_data + 2, new_entrance["blue_warp"] + 2, 2)
                 copy_entrance_record(replaced_entrance["index"], new_entrance["blue_warp"], 2)
 
+    copy_entrance_record(0x3AC, 0x472)
+    print("wired ToT to GF")
         
     exit_table = generate_exit_lookup_table()
 
@@ -1846,9 +1848,19 @@ def get_override_itemid(override_table, scene, type, flags):
 def remove_entrance_blockers(rom):
     def remove_entrance_blockers_do(rom, actor_id, actor, scene):
         if actor_id == 0x014E and scene == 97:
-            actor_var = rom.read_int16(actor + 14);
+            actor_var = rom.read_int16(actor + 14)
             if actor_var == 0xFF01:
                 rom.write_int16(actor + 14, 0x0700)
+        if actor_id == 0x138 and scene == 93:
+            actor_var = rom.read_int16(actor + 14)
+            if actor_var == 0x0301:
+                print("moved the gate opener guard")
+                rom.write_int16(actor + 2, rom.read_int16(actor + 2) - 250)
+                rom.write_int16(actor + 4, rom.read_int16(actor + 4) - 524)
+                rom.write_int16(actor + 6, rom.read_int16(actor + 6) + 100)
+            if actor_var == 0x03A46:
+                print("made GTG guard a gate opener")
+                rom.write_int16(actor + 14, 0x301)
     get_actor_list(rom, remove_entrance_blockers_do)
 
 def set_cow_id_data(rom, world):
